@@ -85,7 +85,7 @@ int main() {
 
                 break;
                 case 5: // printing the whole text
-                    printf(textInput, "\n");
+                    // git printf(textInput, "\n");
                         break;
                 case 6:
                     int lineNumber, symbolIndex;
