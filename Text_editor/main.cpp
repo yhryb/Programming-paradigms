@@ -6,11 +6,13 @@
 int main() {
     int command;
     char textInput[100];
-    int lineLength = strlen(textInput);
+    int textLength = strlen(textInput);
     char* textInputptr = NULL;
     int running = 1;
     char filename[100]; //file name input
     FILE* file;
+    int extraLineLength = strlen(textInput);
+    int lineCount = 0; //starting number of lines of strings
 
     printf("Welcome to Text Editor. Here is what you can do:\n"
     "Ask for available commands - 0;\n"
@@ -30,26 +32,29 @@ int main() {
             case 1: //new text
                 printf("Enter text to append: \n");
                 fgets(textInput, sizeof(textInput), stdin);
-                textInputptr = (char*)malloc(lineLength + 1);
+                textInputptr = (char*)malloc(textLength + 1); //add 1 for \n
                 if (textInputptr != NULL) {
                 strcpy(textInputptr, textInput);
                     textInput[strcspn(textInput, "\n")] = '\0';
-                int extraLineLength = strlen(textInput);
-                if (lineLength > 100) {
-                    lineLength += extraLineLength;
-                    if (textInputptr!= NULL) {
-                        textInputptr = (char*)realloc(textInputptr, lineLength + 1);
-                        strcpy(textInputptr + extraLineLength, textInput);
-                    }
+                // int extraLineLength = strlen(textInput);
+                if (textLength > 100) {
+                    textLength += extraLineLength;
+                    textInputptr = (char*)realloc(textInputptr, textLength + 1);
+                    strcpy(textInputptr + extraLineLength, textInput);
+
                 }
                     printf("Entered text: %s\n", textInputptr);
                     free(textInputptr);
             }
                 break;
                 case 2: //new line
+                    textInputptr = (char*)malloc(textLength + 2); // add 2 for \n and \0
+                    if (textInputptr != NULL) {
+                        textInputptr[textLength] = '\n';
+                        textInputptr[textLength + 1] = '\0';
+                    }
                     printf("New line is started \n");
-                fgets(textInput, sizeof(textInput), stdin);
-                // \0
+                    free(textInputptr);
                 break;
                 case 3: //saving a file
                     printf("Enter the file name for saving: \n");
@@ -60,7 +65,7 @@ int main() {
                     fputs("Hello, files world!", file);
                     fclose(file);
                 }
-                return 0;
+
                 break;
                 case 4: //loading a file
                     printf("Enter the file name for loading: \n");
@@ -77,15 +82,20 @@ int main() {
                     }
                     fclose(file);
                 }
-                return 0;
+
                 break;
-                case 5:
-                    // fputs(inputText);
+                case 5: // printing the whole text
+                    printf(textInput, "\n");
                         break;
                 case 6:
+                    int lineNumber, symbolIndex;
                     printf("Choose line and index: \n");
-                printf("Enter text to insert: \n");
-                break;
+                    scanf("%d %d", &lineNumber, &symbolIndex);
+                    getchar();
+                    printf("Enter text to insert: \n");
+                    fgets(textInput, sizeof(textInput), stdin);
+                    textInput[strcspn(textInput, "\n")] = '\0';
+            break;
                 case 7:
                     printf("Enter text to search: \n");
                 break;
