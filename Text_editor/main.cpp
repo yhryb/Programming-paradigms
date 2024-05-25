@@ -97,7 +97,7 @@ int main() {
                     textInput[strcspn(textInput, "\n")] = '\0';
             break;
                 case 7:
-                    printf("Enter text to search: \n");
+                    //printf("Enter text to search: \n");
                 break;
                 default:
                     printf("The command is not implemented: \n");
