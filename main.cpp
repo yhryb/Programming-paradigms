@@ -36,7 +36,7 @@ int main() {
             case 1: //new text
                 printf("Enter text to append: \n");
                 fgets(textInput, sizeof(textInput), stdin);
-                textInput[strcspn(textInput, "\n")] = '\0';
+                textInput[strcspn(textInput, "\n")] = '\0'; //removing new line character
                 textLinesptr = (char**)realloc(textLinesptr, (lineCount + 1) * sizeof(char*)); //allocating memory for an array of strings,
                 textLinesptr[lineCount] = (char*)malloc(strlen(textInput) + 1); //allocating memory for new text based on the length of the input, plus 1 for null operator
                 strcpy(textLinesptr[lineCount], textInput);
@@ -79,10 +79,9 @@ int main() {
                 break;
             case 5: // printing the whole text
                 for (int i = 0; i < lineCount; i++) {
-                    printf("%s\n", textLinesptr[i]);
+                    printf("%s", textLinesptr[i]);
                 }
                 break;
-
             case 6:
                 int lineNumber, symbolIndex;
                     printf("Choose line and index: \n");
@@ -106,8 +105,16 @@ int main() {
                     }
                     break;
                     case 7:
-                        //printf("Enter text to search: \n");
-                            //break;
+                            printf("Enter text to search: \n");
+                            fgets(textInput, sizeof(textInput), stdin);
+                            textInput[strcspn(textInput, "\n")] = '\0';
+                            for (int i = 0; i < lineCount; i++) {
+                                if (strstr(textLinesptr[i], textInput)) {//strstr searches for first occurence
+                                    printf("Found in line %d\n", i + 1, textLinesptr[i]); //i + 1 because computer counts from 0 and lineCount from 1
+                                }
+                            }
+                            break;
+
                                 default:
                                     printf("The command is not implemented: \n");
                         break;
