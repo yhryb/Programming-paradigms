@@ -83,7 +83,7 @@ int main() {
                 }
                 break;
             case 6:
-                int lineNumber, symbolIndex;
+                    int lineNumber, symbolIndex;
                     printf("Choose line and index: \n");
                     scanf("%d %d", &lineNumber, &symbolIndex);
                     getchar();
@@ -91,17 +91,18 @@ int main() {
                     fgets(textInput, sizeof(textInput), stdin);
                     textInput[strcspn(textInput, "\n")] = '\0';
                     if (lineNumber < 0 || lineNumber >= lineCount) {
-                        printf("Invalid line number.\n");
+                        printf("Line number can not be negative.\n");
                     } else if (symbolIndex < 0 || symbolIndex > strlen(textLinesptr[lineNumber])) {
-                        printf("Invalid symbol index.\n");
+                        printf("Index number can not be negative.\n");
                     } else {
-                        int beforeLength = strlen(textInput);
+                        int beforeLength = strlen(textLinesptr[lineNumber]);
                         int afterLength = strlen(textInput);
                         char* newLineptr = (char*)malloc(beforeLength + afterLength + 1);
                         strncpy(newLineptr, textLinesptr[lineNumber], symbolIndex); //here we copy text from the starting line into buffer up to the intended index so that we can add new text after it
                         strcpy(newLineptr + symbolIndex, textInput); //copies new inputted text at the intended index
                         strcpy(newLineptr + symbolIndex + afterLength, textLinesptr[lineNumber] + symbolIndex); //copies the old text after the inserted text into buffer
                         free(textLinesptr[lineNumber]); //releasing the old memory for the before line
+                        strcpy(textLinesptr[lineNumber] + symbolIndex + afterLength, textLinesptr[lineNumber] + symbolIndex);
                     }
                     break;
                     case 7:
