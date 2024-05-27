@@ -9,11 +9,10 @@
 int main() {
     int command;
     char textInput[MAX_TEXT_LENGTH];
-    //int textLength = 0;
     char** textLinesptr = NULL;
     int running = 1;
     char filename[100]; //file name input
-    FILE* file;
+    FILE* fileptr;
     int lineCount = 0;
 
     printf("Welcome to Text Editor. Here is what you can do:\n"
@@ -37,7 +36,7 @@ int main() {
             case 1: //new text
                 printf("Enter text to append: \n");
                 fgets(textInput, sizeof(textInput), stdin);
-                textInput[strcspn(textInput, "\n")] = '\0'; //to not store \0
+                textInput[strcspn(textInput, "\n")] = '\0';
                 textLinesptr = (char**)realloc(textLinesptr, (lineCount + 1) * sizeof(char*)); //allocating memory for an array of strings,
                 textLinesptr[lineCount] = (char*)malloc(strlen(textInput) + 1); //allocating memory for new text based on the length of the input, plus 1 for null operator
                 strcpy(textLinesptr[lineCount], textInput);
@@ -45,49 +44,46 @@ int main() {
             break;
             case 2: //new line
                 textLinesptr = (char**)realloc(textLinesptr, (lineCount + 1) * sizeof(char*)); //allocating plus 1 line in memory
-            if (textLinesptr != NULL) {
-                textLinesptr[lineCount] = (char*)malloc(sizeof(char)); //allocating 1 byte for newline character at the place of the lineCount
-                textLinesptr[lineCount][0] = '\n';
-                lineCount++;
-            }
-            printf("New line is started \n");
-            break;
+                if (textLinesptr != NULL) {
+                    textLinesptr[lineCount] = (char*)malloc(sizeof(char)); //allocating 1 byte for newline character at the place of the lineCount
+                    textLinesptr[lineCount][0] = '\n';
+                    lineCount++;
+                }
+                printf("New line is started \n");
+                break;
             case 3: //saving a file
                 printf("Enter the file name for saving: \n");
-            fgets(filename, sizeof(filename), stdin);
-            file = fopen(filename, "w");
-            if (file != NULL)
-            {
-                fputs("Hello, files world!", file);
-                fclose(file);
-            }
-
-            break;
+                fgets(filename, sizeof(filename), stdin);
+                fileptr = fopen(filename, "w"); //w mode for write
+                if (fileptr != NULL) {
+                    for (int i = 0; i < lineCount; i++) {
+                        fputs(textLinesptr[i], fileptr);
+                        fputs("\n", fileptr);
+                    }
+                }
+                break;
             case 4: //loading a file
                 printf("Enter the file name for loading: \n");
-            file = fopen(filename, "r");
-            if (file == NULL)
-            {
-                printf("Error opening file");
-            }
-            else
-            {
-                if (fgets(textInput, 100, file) != NULL)
-                {
-                    printf("%s", textInput);
+                fileptr = fopen(filename, "r");
+                if (fileptr == NULL) {
+                    printf("Error opening file");
                 }
-                fclose(file);
-            }
-
-            break;
+                else {
+                    if (fgets(textInput, 100, fileptr) != NULL) {
+                        fputs("\n", fileptr);
+                        //printf("%s", textInput);
+                    }
+                    fclose(fileptr);
+                }
+                break;
             case 5: // printing the whole text
                 for (int i = 0; i < lineCount; i++) {
                     printf("%s\n", textLinesptr[i]);
                 }
-                    break;
+                break;
 
-                    case 6:
-                        int lineNumber, symbolIndex;
+            case 6:
+                int lineNumber, symbolIndex;
                     printf("Choose line and index: \n");
                     scanf("%d %d", &lineNumber, &symbolIndex);
                     getchar();
@@ -107,14 +103,13 @@ int main() {
                         strcpy(newLineptr + symbolIndex + afterLength, textLinesptr[lineNumber] + symbolIndex); //copies the old text after the inserted text into buffer
                         free(textLinesptr[lineNumber]); //releasing the old memory for the before line
                     }
-
                     break;
                     case 7:
                         //printf("Enter text to search: \n");
                             //break;
                                 default:
                                     printf("The command is not implemented: \n");
-                    break;
+                        break;
                 }
         }
     free(textLinesptr);
