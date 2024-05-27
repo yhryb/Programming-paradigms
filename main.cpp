@@ -65,12 +65,10 @@ int main() {
             case 4: //loading a file
                 FILE* file;
                 file = fopen(filename, "r");
-                if (file == NULL)
-                {
+                if (file == NULL) {
                     printf("Error opening file");
                 }
-                else
-                {
+                else {
                     for (int i = 0; i < lineCount; i++) {
                         printf("%s\n", textLinesptr[i]);
                     }
