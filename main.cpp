@@ -63,17 +63,18 @@ int main() {
                 }
                 break;
             case 4: //loading a file
-                printf("Enter the file name for loading: \n");
-                fileptr = fopen(filename, "r");
-                if (fileptr == NULL) {
+                FILE* file;
+                file = fopen(filename, "r");
+                if (file == NULL)
+                {
                     printf("Error opening file");
                 }
-                else {
-                    if (fgets(textInput, 100, fileptr) != NULL) {
-                        fputs("\n", fileptr);
-                        //printf("%s", textInput);
+                else
+                {
+                    for (int i = 0; i < lineCount; i++) {
+                        printf("%s\n", textLinesptr[i]);
                     }
-                    fclose(fileptr);
+                    fclose(file);
                 }
                 break;
             case 5: // printing the whole text
