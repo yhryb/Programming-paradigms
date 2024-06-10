@@ -3,22 +3,34 @@
 //
 #include <iostream>
 #include <cstdlib>
-#include<cstring>
+#include <cstring>
 #include <fstream>
 
 #define MAX_TEXT_LENGTH 4096
 
-class textEditor {
+class TextEditor {
 private:
     char textInput[MAX_TEXT_LENGTH];
-    char** textLinesptr = NULL;
+    char* textBufferptr[MAX_TEXT_LENGTH]; //pointers to lines
+    char** textLinesptr; //pointers to pointers
     bool running;
     char filename[100]; //file name input
-    FILE* fileptr;
-    int lineCount = 0;
+    int lineCount;
 
 public:
-    void printMenu() {
+    TextEditor () : running(true) {
+        textLinesptr = new char*[MAX_TEXT_LENGTH];
+        lineCount = 0;
+    }
+
+    ~TextEditor() {
+        for (int i = 0; i < lineCount; i++) {
+            delete[] textBufferptr[i];
+        }
+        delete[] textLinesptr;
+    }
+
+    void PrintMenu() {
         std::cout << "Welcome to Text Editor. Here is what you can do:\n"
                       << "Ask for available commands - 0;\n"
                       << "Enter new text - 1;\n"
@@ -30,56 +42,60 @@ public:
                       << "Search - 7;\n";
                       }
 
-    void inputText() {
+    void InputText() {
         std::cout << "Enter text to append: \n";
         std::cin.getline(textInput, sizeof(textInput));
         textInput[strcspn(textInput, "\n")] = '\0'; //removing new line character
-        textLinesptr[lineCount] = new char[strlen(textInput) + 1];
-        strcpy(textLinesptr[lineCount], textInput);
+        textBufferptr[lineCount] = new char[strlen(textInput) + 1];
+        strcpy(textBufferptr[lineCount], textInput);
+        textLinesptr[lineCount] = textBufferptr[lineCount];
         lineCount++;
     }
 
-    void newLine() {
-        textLinesptr[lineCount] = new char[1]; //allocating 1 byte for newline character at the place of the lineCount
-        textLinesptr[lineCount][0] = '\n';
+    void NewLine() {
+        textBufferptr[lineCount] = new char[1]; //allocating 1 byte for newline character at the place of the lineCount
+        textBufferptr[lineCount][0] = '\n';
+        textLinesptr[lineCount] = textBufferptr[lineCount];
         lineCount++;
     }
 
-    void saveFile() {
+    void SaveFile() {
         std::cout << "Enter the file name for saving: \n" ;
         std::cin.getline(filename, sizeof(filename));
         textInput[strcspn(textInput, "\n")] = '\0';
         std::ofstream file(filename);
-        if (fileptr != nullptr) {
-            for (int i = 0; i < lineCount; ++i) {
-                file << textInput[i] << '\n';
-            }
-            file.close();
+        for (int i = 0; i < lineCount; ++i) {
+            file << textLinesptr[i] << '\n';
         }
+        file.close();
     }
 
-    void loadFile() {
+    void LoadFile() {
         std::cout << "Enter the file name for loading: \n" ;
         std::cin.getline(filename, sizeof(filename));
         std::ifstream file(filename);
-        textLinesptr[lineCount] = new char[strlen(textInput) + 1];
-        strcpy(textLinesptr[lineCount], textInput);
-        lineCount++;
+        while (file.getline(textInput, sizeof(textInput))) {
+            textBufferptr[lineCount] = new char[strlen(textInput) + 1]; //+1 for \n
+            strcpy(textBufferptr[lineCount], textInput);
+            textLinesptr[lineCount] = textBufferptr[lineCount];
+            lineCount++;
+        }
+        file.close();
     }
 
-    void printText() {
+    void PrintText() {
         for (int i = 0; i < lineCount; i++) {
             std::cout << textLinesptr[i];
         }
     }
 
-    void insertText() {
+    void InsertText() {
         int lineNumber, symbolIndex;
         std::cout << "Choose line and index: \n";
         std::cin >> lineNumber >> symbolIndex;
-        textInput[strcspn(textInput, "\n")] = '\0';
-        printf("Enter text to insert: \n");
-        std::cin.getline(filename, sizeof(filename));
+        std::cin.ignore();
+        std::cout << "Enter text to insert: \n";
+        std::cin.getline(textInput, sizeof(textInput));
         textInput[strcspn(textInput, "\n")] = '\0';
         if (lineNumber < 0 || lineNumber >= lineCount) {
             std::cout << "Line number can not be negative.\n";
@@ -87,24 +103,28 @@ public:
             std::cout << "Index number can not be negative.\n";
         } else {
             int beforeLength = strlen(textLinesptr[lineNumber]);
-            int afterLength = beforeLength + strlen(textInput);
-            memmove(textLinesptr[lineNumber] + symbolIndex + strlen(textInput), textLinesptr[lineNumber] + symbolIndex, beforeLength - symbolIndex + 1);
-            memcpy(textLinesptr[lineNumber] + symbolIndex, textInput, strlen(textInput));
+            int afterLength = strlen(textInput);
+            char* newLineptr = new char[beforeLength + afterLength + 1];
+            strncpy(newLineptr, textLinesptr[lineNumber], symbolIndex); //here we copy text from the starting line into buffer up to the intended index so that we can add new text after it
+            strcpy(newLineptr + symbolIndex, textInput); //copies new inputted text at the intended index
+            strcpy(newLineptr + symbolIndex + afterLength, textLinesptr[lineNumber] + symbolIndex); //copies the old text after the inserted text into buffer
+            delete[] textLinesptr[lineNumber];
+            textLinesptr[lineNumber] = newLineptr;
         }
     }
 
-    void searchText() {
+    void SearchText() {
         std::cout << "Enter text to search: \n";
         std::cin.getline(textInput, sizeof(textInput));
         textInput[strcspn(textInput, "\n")] = '\0';
         for (int i = 0; i < lineCount; i++) {
             if (strstr(textLinesptr[i], textInput)) {//strstr searches for first occurence
-                std::cout << "Found in line" << i + 1 << "\n"; //i + 1 because computer counts from 0 and lineCount from 1
+                std::cout << "Found in line " << i + 1 << "\n"; //i + 1 because computer counts from 0 and lineCount from 1
             }
         }
     }
 
-    void runProgram() {
+    void RunProgram() {
         int command;
         while (running) {
             std::cout << "Choose the command (1-7): \n";
@@ -115,25 +135,25 @@ public:
                     running = false;
                 break;
                 case 1: //new text
-                    inputText();
+                    InputText();
                 break;
                 case 2: //new line
-                    newLine();
+                    NewLine();
                 break;
                 case 3: //saving a file
-                    saveFile();
+                    SaveFile();
                 break;
                 case 4: //loading a file
-                    loadFile();
+                    LoadFile();
                 break;
                 case 5: //printing the whole text
-                    printText();
+                    PrintText();
                 break;
                 case 6: //inserting
-                    insertText();
+                    InsertText();
                 break;
                 case 7: //searching
-                    searchText();
+                    SearchText();
                 break;
                 default:
                     std::cout << "The command is not implemented: \n";
@@ -144,7 +164,7 @@ public:
     };
 
 int main() {
-    textEditor textEditorObject;
-    textEditorObject.runProgram;
+    TextEditor TextEditorObject;
+    TextEditorObject.RunProgram();
     return 0;
 }
