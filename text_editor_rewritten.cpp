@@ -110,6 +110,7 @@ public:
             strcpy(newLineptr + symbolIndex + afterLength, textLinesptr[lineNumber] + symbolIndex); //copies the old text after the inserted text into buffer
             delete[] textLinesptr[lineNumber];
             textLinesptr[lineNumber] = newLineptr;
+            textBufferptr[lineNumber] = newLineptr;
         }
     }
 
@@ -120,6 +121,32 @@ public:
         for (int i = 0; i < lineCount; i++) {
             if (strstr(textLinesptr[i], textInput)) {//strstr searches for first occurence
                 std::cout << "Found in line " << i + 1 << "\n"; //i + 1 because computer counts from 0 and lineCount from 1
+            }
+        }
+    }
+
+    void ReplaceText() {
+        std::cout << "Enter text to replace: \n";
+        std::cin.getline(textInput, sizeof(textInput));
+        textInput[strcspn(textInput, "\n")] = '\0';
+        char replacementText[MAX_TEXT_LENGTH]; //holds replacement text
+        std::cout << "Enter new text: \n";
+        std::cin.getline(replacementText, sizeof(replacementText));
+        replacementText[strcspn(replacementText, "\n")] = '\0';
+        for (int i = 0; i< lineCount; i++) { //iterating through the text to find the searched text
+            char* positionptr = strstr(textLinesptr[i], textInput);
+            if (positionptr) { //validation of whether does the text exist or not
+                int index = positionptr - textLinesptr[i]; //index of the position of the text to replace
+                int searchedTextLength = strlen(textInput);
+                int replacementTextLength = strlen(replacementText);
+                int afterLength = strlen(textLinesptr[i]) - searchedTextLength + replacementTextLength;
+                char* newLineptr = new char[afterLength + 1];
+                strncpy(newLineptr, textLinesptr[i], index); //copying the part of the line before the text to replace
+                strcpy(newLineptr + index, replacementText); //copying the replacement text into the new line
+                strcpy(newLineptr + replacementTextLength, textLinesptr[i] + index + searchedTextLength); //copying the part after the replacement text
+                delete[] textLinesptr[i];
+                textLinesptr[i] = newLineptr;
+                textBufferptr[i] = newLineptr;
             }
         }
     }
@@ -154,6 +181,9 @@ public:
                 break;
                 case 7: //searching
                     SearchText();
+                break;
+                case 14: //replacing
+                    ReplaceText();
                 break;
                 default:
                     std::cout << "The command is not implemented: \n";
