@@ -19,6 +19,9 @@ private:
     char* backupLinesptr[MAX_TEXT_LENGTH];
     int redoCount;
     char* redoLinesptr [MAX_TEXT_LENGTH];
+    char* copiedTextptr;
+    int copiedLineCount;
+    int copiedTextLength;
 
 public:
 
@@ -228,10 +231,57 @@ public:
         }
     }
 
+    void CopyText() {
+        std::cout << "Enter the line number and starting index to copy from: \n";
+        int lineNumber, startIndex, endIndex;
+        std::cin >> lineNumber >> startIndex;
+        std::cout << "Enter the ending index: \n";
+        std::cin >> endIndex;
+        std::cin.ignore();
+        if (lineNumber < 0 || lineNumber >= lineCount) {
+            std::cout << "Line number can not be negative.\n";
+        } else if (startIndex < 0 || endIndex > strlen(textLinesptr[lineNumber])) {
+            std::cout << "Index number can not be negative.\n";
+        } else {
+            if (copiedTextptr != nullptr) {
+                delete[] copiedTextptr;
+            }
+            copiedTextLength = endIndex - startIndex + 1;
+            copiedTextptr = new char[copiedTextLength + 1];
+            strncpy(copiedTextptr, textLinesptr[lineNumber] + startIndex, copiedTextLength);
+            copiedTextptr[copiedTextLength] = '\0';
+            std::cout << "Copied text: " << copiedTextptr << "\n";
+        }
+    }
+
+    void PasteText() {
+        BackupState();
+        ClearRedo();
+        int lineNumber, startIndex, endIndex;
+        std::cout << "Enter the line number and index to paste at: \n";
+        int symbolIndex;
+        std::cin >> lineNumber >> symbolIndex;
+        std::cin.ignore();
+        if (lineNumber < 0 || lineNumber >= lineCount) {
+            std::cout << "Line number can not be negative.\n";
+        } else if (startIndex < 0 || endIndex > strlen(textLinesptr[lineNumber])) {
+            std::cout << "Index number can not be negative.\n";
+        } else {
+            int beforeLength = strlen(textLinesptr[lineNumber]);
+            char* newLineptr = new char[beforeLength + copiedTextLength + 1];
+            strncpy(newLineptr, textLinesptr[lineNumber], symbolIndex);
+            strcpy(newLineptr + symbolIndex, copiedTextptr);
+            strcpy(newLineptr + symbolIndex + copiedTextLength, textLinesptr[lineNumber] + symbolIndex);
+            delete[] textLinesptr[lineNumber];
+            textLinesptr[lineNumber] = newLineptr;
+            textBufferptr[lineNumber] = newLineptr;
+        }
+    }
+
     void RunProgram() {
         int command;
         while (running) {
-            std::cout << "Choose the command (1-7): \n";
+            std::cout << "Choose the command (1-14): \n";
             std::cin >> command; //scans the inputted command
             std::cin.ignore(); //consumes leftover so that input is allowed
             switch (command) {
@@ -267,6 +317,12 @@ public:
                 break;
                 case 11:
                     Delete();
+                break;
+                case 12:
+                    CopyText();
+                break;
+                case 13:
+                    PasteText();
                 break;
                 case 14: //replacing
                     ReplaceText();
