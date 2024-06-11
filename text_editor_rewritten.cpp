@@ -206,6 +206,28 @@ public:
         ClearRedo();
     }
 
+    void Delete() {
+        BackupState();
+        ClearRedo();
+        std::cout << "Enter text to delete: \n";
+        std::cin.getline(textInput, sizeof(textInput));
+        textInput[strcspn(textInput, "\n")] = '\0';
+        for (int i = 0; i < lineCount; i++) {
+            char* positionptr = strstr(textLinesptr[i], textInput);
+            if (positionptr) {
+                int index = positionptr - textLinesptr[i];
+                int searchTextLength = strlen(textInput);
+                int afterLength = strlen(textLinesptr[i]) - searchTextLength;
+                char* newLineptr = new char[afterLength + 1];
+                strncpy(newLineptr, textLinesptr[i], index);
+                strcpy(newLineptr + index, textLinesptr[i] + index + searchTextLength);
+                delete[] textLinesptr[i];
+                textLinesptr[i] = newLineptr;
+                textBufferptr[i] = newLineptr;
+            }
+        }
+    }
+
     void RunProgram() {
         int command;
         while (running) {
@@ -244,7 +266,8 @@ public:
                     Redo();
                 break;
                 case 11:
-
+                    Delete();
+                break;
                 case 14: //replacing
                     ReplaceText();
                 break;
