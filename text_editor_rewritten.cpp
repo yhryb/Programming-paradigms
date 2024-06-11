@@ -2,7 +2,6 @@
 // Created by MacUser on 01.06.2024.
 //
 #include <iostream>
-#include <cstdlib>
 #include <cstring>
 #include <fstream>
 
@@ -16,8 +15,13 @@ private:
     bool running;
     char filename[100]; //file name input
     int lineCount;
+    int backupCount;
+    char* backupLinesptr[MAX_TEXT_LENGTH];
+    int redoCount;
+    char* redoLinesptr [MAX_TEXT_LENGTH];
 
 public:
+
     TextEditor () : running(true) {
         textLinesptr = new char*[MAX_TEXT_LENGTH];
         lineCount = 0;
@@ -43,6 +47,8 @@ public:
                       }
 
     void InputText() {
+        BackupState();
+        ClearRedo();
         std::cout << "Enter text to append: \n";
         std::cin.getline(textInput, sizeof(textInput));
         textInput[strcspn(textInput, "\n")] = '\0'; //removing new line character
@@ -53,6 +59,8 @@ public:
     }
 
     void NewLine() {
+        BackupState();
+        ClearRedo();
         textBufferptr[lineCount] = new char[1]; //allocating 1 byte for newline character at the place of the lineCount
         textBufferptr[lineCount][0] = '\n';
         textLinesptr[lineCount] = textBufferptr[lineCount];
@@ -90,6 +98,8 @@ public:
     }
 
     void InsertText() {
+        BackupState();
+        ClearRedo();
         int lineNumber, symbolIndex;
         std::cout << "Choose line and index: \n";
         std::cin >> lineNumber >> symbolIndex;
@@ -126,6 +136,8 @@ public:
     }
 
     void ReplaceText() {
+        BackupState();
+        ClearRedo();
         std::cout << "Enter text to replace: \n";
         std::cin.getline(textInput, sizeof(textInput));
         textInput[strcspn(textInput, "\n")] = '\0';
@@ -149,6 +161,49 @@ public:
                 textBufferptr[i] = newLineptr;
             }
         }
+    }
+
+    void BackupState() {
+        for (int i = 0; i < lineCount; i++) {
+            backupLinesptr[i] = new char[strlen(textLinesptr[i]) + 1];
+            strcpy(backupLinesptr[i], textLinesptr[i]);
+        }
+        backupCount = lineCount;
+    }
+
+    void ClearRedo() {
+        for (int i = 0; i < redoCount; i++) {
+            delete[] redoLinesptr[i];
+        }
+        redoCount = 0;
+    }
+
+    void Undo() {
+        ClearRedo();
+        for (int i = 0; i < lineCount; i++) { //saving the current state to redo buffer
+            redoLinesptr[i] = new char[strlen(textLinesptr[i]) + 1];
+            strcpy(redoLinesptr[i], textLinesptr[i]);
+        }
+        redoCount = lineCount;
+        for (int i = 0; i < lineCount; i++) { //deleting the last actions on textLinesptr
+            delete[] textLinesptr[i];
+        }
+        for (int i = 0; i < backupCount; i++) { //use the backup text
+            textLinesptr[i] = backupLinesptr[i];
+        }
+        lineCount = backupCount;
+    }
+
+    void Redo() {
+        BackupState();
+        for (int i = 0; i < lineCount; i++) {
+            delete[] textLinesptr[i];
+        }
+        for (int i = 0; i < redoCount; i++) {
+            textLinesptr[i] = redoLinesptr[i];
+        }
+        lineCount = redoCount;
+        ClearRedo();
     }
 
     void RunProgram() {
@@ -182,6 +237,12 @@ public:
                 case 7: //searching
                     SearchText();
                 break;
+                case 9: //undoing
+                    Undo();
+                break;
+                case 10: //redoing
+                    Redo();
+                break;
                 case 14: //replacing
                     ReplaceText();
                 break;
@@ -198,3 +259,4 @@ int main() {
     TextEditorObject.RunProgram();
     return 0;
 }
+
