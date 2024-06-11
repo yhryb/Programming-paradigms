@@ -243,6 +243,8 @@ public:
                 case 10: //redoing
                     Redo();
                 break;
+                case 11:
+
                 case 14: //replacing
                     ReplaceText();
                 break;
