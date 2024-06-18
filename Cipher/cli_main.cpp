@@ -32,8 +32,8 @@ int main() {
     }
 
     // Call the function
-    int key;
     char functionChoice;
+    int key;
     char input[100];
 
     std::cout << "Encrypt/Decrypt: ";
