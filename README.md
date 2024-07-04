@@ -10,3 +10,7 @@
 ### 0000000000003cd4 T _encrypt
 ###                  U _strlen
 
+# Assignment 4 command line
+### g++ -shared -o libcipher.dylib cipher_library.cpp
+### g++ -o main CLI.cpp TextEditor.cpp CaesarCipher.cpp -ldl
+### ./main
