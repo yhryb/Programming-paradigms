@@ -12,5 +12,5 @@
 
 # Assignment 4 command line
 ### g++ -shared -o libcipher.dylib cipher_library.cpp
-### g++ -o main CLI.cpp TextEditor.cpp CaesarCipher.cpp -ldl
+### g++ -o main CLI.cpp Text.cpp CaesarCipher.cpp -ldl
 ### ./main
